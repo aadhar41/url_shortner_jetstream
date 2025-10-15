@@ -12,11 +12,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
+        $this->call([
+            CompanySeeder::class,
+        ]);
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        \App\Models\User::factory(10)->create()->each(function ($user) {
+            $companyIds = \App\Models\Company::pluck('id')->all();
+            $roles = ['SuperAdmin', 'Admin', 'Member'];
+            $user->company_id = $companyIds ? fake()->randomElement($companyIds) : null;
+            $user->role = fake()->randomElement($roles);
+            $user->save();
+        });
     }
 }

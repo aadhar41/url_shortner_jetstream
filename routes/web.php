@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\Web\CompanyWebController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -25,4 +26,17 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    // Companies web CRUD routes
+    Route::resource('companies', CompanyWebController::class, [
+        'names' => [
+            'index' => 'web.companies.index',
+            'create' => 'web.companies.create',
+            'store' => 'web.companies.store',
+            'show' => 'web.companies.show',
+            'edit' => 'web.companies.edit',
+            'update' => 'web.companies.update',
+            'destroy' => 'web.companies.destroy',
+        ]
+    ]);
 });

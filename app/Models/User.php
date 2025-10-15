@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany; // Import HasMany
 
 class User extends Authenticatable
 {
@@ -58,4 +59,15 @@ class User extends Authenticatable
     protected $appends = [
         'profile_photo_url',
     ];
+
+    /**
+     * Get the companies owned by the user.
+     *
+     * @return HasMany
+     */
+    public function ownedCompanies(): HasMany
+    {
+        // The foreign key 'owner_user_id' is specified as it deviates from the default 'user_id'
+        return $this->hasMany(Company::class, 'owner_user_id');
+    }
 }
