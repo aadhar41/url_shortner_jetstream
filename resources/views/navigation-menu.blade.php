@@ -14,11 +14,11 @@
                     </x-nav-link>
 
                     {{-- NEW: Company Management Link (SuperAdmin Only) --}}
-                    {{-- @if (Auth::user()->role === 'SuperAdmin') --}}
-                    <x-nav-link href="{{ route('web.companies.index') }}" :active="request()->routeIs('web.companies.*')">
-                        {{ __('Companies') }}
-                    </x-nav-link>
-                    {{-- @endif --}}
+                    @if (Auth::user()->role === 'SuperAdmin')
+                        <x-nav-link href="{{ route('web.companies.index') }}" :active="request()->routeIs('web.companies.*')">
+                            {{ __('Clients') }}
+                        </x-nav-link>
+                    @endif
 
                     {{-- NEW: Short URLs Link (Visible to all except SuperAdmin who has a special restriction) --}}
                     @if (Auth::user()->role !== 'SuperAdmin')
@@ -27,9 +27,15 @@
                         </x-nav-link>
                     @endif
 
-                    <x-nav-link href="{{ route('web.users.index') }}" :active="request()->routeIs('web.users.*')">
-                        {{ __('Client') }}
-                    </x-nav-link>
+                    @if (Auth::user()->role == 'Admin')
+                        <x-nav-link href="{{ route('web.users.index') }}" :active="request()->routeIs('web.users.*')">
+                            @if (Auth::user()->role == 'Admin')
+                                {{ __('Team Members') }}
+                            @else
+                                {{ __('Clients') }}
+                            @endif
+                        </x-nav-link>
+                    @endif
 
                 </div>
             </div>

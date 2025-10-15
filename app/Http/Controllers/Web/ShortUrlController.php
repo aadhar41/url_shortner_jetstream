@@ -7,18 +7,15 @@ use App\Models\ShortUrl;
 use App\Http\Requests\ShortUrl\StoreShortUrlRequest;
 use App\Http\Requests\ShortUrl\UpdateShortUrlRequest;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request; // Added Request
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
-use Symfony\Component\HttpFoundation\StreamedResponse; // Added for CSV download
-use Illuminate\Support\Carbon; // Ensure Carbon is available
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Carbon;
 
 class ShortUrlController extends Controller
 {
-    /**
-     * Display a listing of the resource (Short URLs for the current company) with optional search and download.
-     */
     /**
      * Display a listing of the resource.
      *
@@ -27,14 +24,37 @@ class ShortUrlController extends Controller
      */
     public function index(Request $request)
     {
+        $user = Auth::user(); // Get the authenticated user
+
+        // Enforce the viewAny policy (ensures the user is logged in)
+        $this->authorize('viewAny', ShortUrl::class);
+
         // 1. Get query parameters
         $search = $request->get('search');
         $period = $request->get('period');
 
-        // Start the base query, typically filtering by the authenticated user
-        $query = ShortUrl::query()
-            ->where('user_id', auth()->id()) // Assuming short URLs are user-specific
-            ->latest(); // Default sorting by created_at DESC
+        // Start the base query
+        $query = ShortUrl::query()->latest(); // Default sorting by created_at DESC
+
+        // --- APPLY ROLE-BASED VISIBILITY FILTERING ---
+        if ($user->role === 'Member') {
+            // Member: Can only see short URLs created by themselves.
+            $query->where('user_id', $user->id);
+        } elseif ($user->role === 'Admin') {
+            // Admin: Can only see short URLs created by members in their own company.
+            if ($user->company_id) {
+                // Assumes ShortUrl model has a 'user' relationship to the creating user.
+                $query->whereHas('user', function ($q) use ($user) {
+                    $q->where('company_id', $user->company_id);
+                });
+            } else {
+                // Admin not associated with a company sees nothing.
+                $query->whereRaw('1 = 0');
+            }
+        }
+        // SuperAdmin: No filter needed, they see all short URLs globally (as per policy).
+        // ---------------------------------------------
+
 
         // 2. Apply Search Filter (if present)
         $query->when($search, function ($q, $search) {
@@ -115,6 +135,8 @@ class ShortUrlController extends Controller
      */
     public function create(): View
     {
+        // Policy check: Member/Admin are allowed, SuperAdmin is denied.
+        $this->authorize('create', ShortUrl::class);
         return view('short_urls.create');
     }
 
@@ -123,6 +145,9 @@ class ShortUrlController extends Controller
      */
     public function store(StoreShortUrlRequest $request): RedirectResponse
     {
+        // Policy check: Member/Admin are allowed, SuperAdmin is denied.
+        $this->authorize('create', ShortUrl::class);
+
         $validated = $request->validated();
 
         // Assign foreign keys and generate short code if not provided
@@ -143,7 +168,8 @@ class ShortUrlController extends Controller
      */
     public function show(ShortUrl $shortUrl): View
     {
-        // Add authorization check here if necessary (e.g., must belong to company)
+        // Policy check: Uses the 'view' method to enforce Admin/Member company/self-scope.
+        $this->authorize('view', $shortUrl);
         return view('short_urls.show', compact('shortUrl'));
     }
 
@@ -152,7 +178,8 @@ class ShortUrlController extends Controller
      */
     public function edit(ShortUrl $shortUrl): View
     {
-        // Add authorization check here if necessary
+        // Policy check: Uses the 'update' policy (which can fall back to 'view' if 'update' is undefined).
+        $this->authorize('update', $shortUrl);
         return view('short_urls.edit', compact('shortUrl'));
     }
 
@@ -161,6 +188,8 @@ class ShortUrlController extends Controller
      */
     public function update(UpdateShortUrlRequest $request, ShortUrl $shortUrl): RedirectResponse
     {
+        // Policy check: Uses the 'update' policy.
+        $this->authorize('update', $shortUrl);
         $shortUrl->update($request->validated());
 
         return redirect()->route('web.short_urls.index')->with('success', 'Short URL updated successfully.');
@@ -171,7 +200,8 @@ class ShortUrlController extends Controller
      */
     public function destroy(ShortUrl $shortUrl): RedirectResponse
     {
-        // Add authorization check here if necessary
+        // Policy check: Uses the 'delete' policy (which can fall back to 'view' if 'delete' is undefined).
+        $this->authorize('delete', $shortUrl);
         $shortUrl->delete();
 
         return redirect()->route('web.short_urls.index')->with('success', 'Short URL deleted successfully.');
