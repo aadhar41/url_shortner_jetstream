@@ -10,22 +10,45 @@
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
                 <div class="p-6 lg:p-8 bg-white border-b border-gray-200">
 
-                    <!-- Actions Row: Search, Create Button, Download Button -->
+                    <!-- Actions Row: Filter, Search, Create Button, Download Button -->
                     <div
                         class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
                         <h3 class="text-2xl font-bold text-gray-700">Your Short Links</h3>
 
-                        <div class="flex space-x-3 w-full sm:w-auto">
+                        <!-- Combined Actions: Filter, Search, Download, Create. Using gap-3 for consistent spacing -->
+                        <div class="flex flex-wrap items-center justify-end gap-3 w-full sm:w-auto">
+
+                            <!-- Filter Dropdown Form -->
+                            <form method="GET" action="{{ route('web.short_urls.index') }}" id="filter-form">
+                                {{-- Preserve search term if present when filtering --}}
+                                @if (request('search'))
+                                    <input type="hidden" name="search" value="{{ request('search') }}">
+                                @endif
+                                <select name="period" onchange="document.getElementById('filter-form').submit()"
+                                    class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm text-sm p-2 bg-white pr-8">
+                                    <option value="">All Time</option>
+                                    <option value="today" {{ request('period') == 'today' ? 'selected' : '' }}>
+                                        Today</option>
+                                    <option value="week" {{ request('period') == 'week' ? 'selected' : '' }}>
+                                        This Week</option>
+                                    <option value="month" {{ request('period') == 'month' ? 'selected' : '' }}>
+                                        This Month</option>
+                                </select>
+                            </form>
+
                             <!-- Search Form -->
                             <form method="GET" action="{{ route('web.short_urls.index') }}"
                                 class="flex items-center w-full sm:w-auto">
+                                {{-- Preserve filter period if present when searching --}}
+                                @if (request('period'))
+                                    <input type="hidden" name="period" value="{{ request('period') }}">
+                                @endif
                                 <input type="search" name="search" placeholder="Search URLs or codes..."
                                     value="{{ request('search') }}"
-                                    class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-l-md shadow-sm text-sm p-2 w-full sm:w-48" />
-                                <button type="submit" {{-- UPDATED CLASSES: Added shadow-lg, hover:shadow-xl, and darker background for contrast --}}
-                                    class="inline-flex items-center p-2 bg-gray-700 border border-transparent rounded-r-md text-white shadow-lg transition ease-in-out duration-150 hover:bg-gray-800 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                    class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-l-lg shadow-sm text-sm p-2 w-full sm:w-40" />
+                                <button type="submit"
+                                    class="inline-flex items-center p-2 bg-gray-700 border border-transparent rounded-r-lg text-white shadow-lg transition ease-in-out duration-150 hover:bg-gray-800 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                                     <!-- Search Icon (Filled for better visibility) -->
-                                    {{-- Switched to a filled icon path for robustness and visibility --}}
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                         stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-500">
                                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -36,7 +59,6 @@
 
                             <!-- Download Button -->
                             <a href="{{ route('web.short_urls.index', array_merge(request()->query(), ['download' => 'csv'])) }}"
-                                {{-- UPDATED CLASSES: Added shadow-lg, hover:shadow-xl, rounded-lg, and enhanced hover/active states --}}
                                 class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest shadow-lg transition ease-in-out duration-150 hover:bg-red-700 hover:shadow-xl active:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-25">
                                 <!-- Download Icon -->
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20"
@@ -51,7 +73,7 @@
                             </a>
 
                             <!-- Generate Short URL Button -->
-                            <a href="{{ route('web.short_urls.create') }}" {{-- UPDATED CLASSES: Added shadow-lg, hover:shadow-xl, rounded-lg, and enhanced hover/active states --}}
+                            <a href="{{ route('web.short_urls.create') }}"
                                 class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-lg font-semibold text-xs text-white uppercase tracking-widest shadow-lg transition ease-in-out duration-150 hover:bg-indigo-700 hover:shadow-xl active:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-25">
                                 {{ __('Generate Short URL') }}
                             </a>
@@ -166,7 +188,7 @@
                                             <td
                                                 class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
                                                 <a href="{{ route('web.short_urls.edit', $shortUrl) }}"
-                                                    class="text-indigo-600 hover:text-indigo-900">
+                                                    class="bg-blue-600 hover:bg-blue-700 text-gray-600 hover:text-gray-900 font-medium mr-4 py-1 px-3 rounded-md transition duration-150 ease-in-out shadow-md">
                                                     {{ __('Edit') }}
                                                 </a>
                                                 <form action="{{ route('web.short_urls.destroy', $shortUrl) }}"
@@ -175,7 +197,7 @@
                                                     @method('DELETE')
                                                     {{-- NOTE: Removed non-compliant browser 'confirm()' call --}}
                                                     <button type="submit"
-                                                        class="text-red-600 hover:text-red-900 font-semibold"
+                                                        class="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold py-1 px-3 rounded-md transition duration-150 ease-in-out shadow-md"
                                                         title="Delete this short URL">
                                                         {{ __('Delete') }}
                                                     </button>

@@ -12,36 +12,72 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse; // Added for CSV download
+use Illuminate\Support\Carbon; // Ensure Carbon is available
 
 class ShortUrlController extends Controller
 {
     /**
      * Display a listing of the resource (Short URLs for the current company) with optional search and download.
      */
-    public function index(Request $request): View|StreamedResponse // Accepts Request and can return View or StreamedResponse
+    /**
+     * Display a listing of the resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\View\View
+     */
+    public function index(Request $request)
     {
-        $companyId = Auth::user()->company_id;
-        $query = ShortUrl::where('company_id', $companyId);
-        $searchTerm = $request->input('search');
+        // 1. Get query parameters
+        $search = $request->get('search');
+        $period = $request->get('period');
 
-        // Apply Search Filter
-        if ($searchTerm) {
-            $query->where(function ($q) use ($searchTerm) {
-                // Search in both original URL and short code
-                $q->where('original_url', 'like', '%' . $searchTerm . '%')
-                  ->orWhere('short_code', 'like', '%' . $searchTerm . '%');
+        // Start the base query, typically filtering by the authenticated user
+        $query = ShortUrl::query()
+            ->where('user_id', auth()->id()) // Assuming short URLs are user-specific
+            ->latest(); // Default sorting by created_at DESC
+
+        // 2. Apply Search Filter (if present)
+        $query->when($search, function ($q, $search) {
+            return $q->where(function ($subQuery) use ($search) {
+                $subQuery->where('original_url', 'like', "%{$search}%")
+                         ->orWhere('short_code', 'like', "%{$search}%");
             });
-        }
+        });
+
+        // 3. Apply Period Filter (if present)
+        $query->when($period, function ($q, $period) {
+            // Get the current time instance from Carbon
+            $now = Carbon::now();
+
+            switch ($period) {
+                case 'today':
+                    // Filter records created today
+                    return $q->whereDate('created_at', $now->toDateString());
+
+                case 'week':
+                    // Filter records created this week (from start of Monday to end of Sunday)
+                    return $q->whereBetween('created_at', [$now->startOfWeek(), $now->endOfWeek()]);
+
+                case 'month':
+                    // Filter records created this month (from the 1st day to the last day)
+                    return $q->whereBetween('created_at', [$now->startOfMonth(), $now->endOfMonth()]);
+
+                default:
+                    // If the period is not recognized or is empty, return the query as is
+                    return $q;
+            }
+        });
 
         // Handle CSV Download Request
         if ($request->get('download') === 'csv') {
             return $this->downloadCsv($query->get());
         }
 
-        // Fetch paginated results for the view, preserving the search query in pagination links
-        $shortUrls = $query->orderByDesc('created_at')->paginate(10)->withQueryString();
+        // 4. Fetch paginated results
+        // ->withQueryString() is crucial to ensure search/filter parameters persist when clicking pagination links
+        $shortUrls = $query->paginate(10)->withQueryString();
 
-        return view('short_urls.index', compact('shortUrls', 'searchTerm'));
+        return view('short_urls.index', compact('shortUrls'));
     }
 
     /**
