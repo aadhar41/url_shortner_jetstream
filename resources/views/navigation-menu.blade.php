@@ -16,16 +16,16 @@
                     {{-- NEW: Company Management Link (SuperAdmin Only) --}}
                     @if (Auth::user()->role === 'SuperAdmin')
                         <x-nav-link href="{{ route('web.companies.index') }}" :active="request()->routeIs('web.companies.*')">
-                            {{ __('Clients') }}
+                            {{ __('Companies') }}
                         </x-nav-link>
                     @endif
 
                     {{-- NEW: Short URLs Link (Visible to all except SuperAdmin who has a special restriction) --}}
-                    @if (Auth::user()->role !== 'SuperAdmin')
-                        <x-nav-link href="{{ route('web.short_urls.index') }}" :active="request()->routeIs('web.short_urls.*')">
-                            {{ __('Short URLs') }}
-                        </x-nav-link>
-                    @endif
+                    {{-- @if (Auth::user()->role !== 'SuperAdmin') --}}
+                    <x-nav-link href="{{ route('web.short_urls.index') }}" :active="request()->routeIs('web.short_urls.*')">
+                        {{ __('Short URLs') }}
+                    </x-nav-link>
+                    {{-- @endif --}}
 
                     @if (Auth::user()->role == 'Admin')
                         <x-nav-link href="{{ route('web.users.index') }}" :active="request()->routeIs('web.users.*')">
