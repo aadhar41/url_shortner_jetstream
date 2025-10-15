@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\ShortUrlController;
 use App\Http\Controllers\Web\CompanyWebController;
+use App\Http\Controllers\Web\UserWebController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,6 +33,8 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
             return view('dashboard');
         })->name('dashboard');
         Route::resource('companies', CompanyWebController::class);
+
+        Route::resource('users', UserWebController::class);
 
         // Short URL Management Routes
         Route::resource('short_urls', ShortUrlController::class);

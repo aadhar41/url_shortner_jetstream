@@ -27,6 +27,9 @@
                         </x-nav-link>
                     @endif
 
+                    <x-nav-link href="{{ route('web.users.index') }}" :active="request()->routeIs('web.users.*')">
+                        {{ __('Client') }}
+                    </x-nav-link>
 
                 </div>
             </div>
