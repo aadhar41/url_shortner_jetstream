@@ -29,7 +29,7 @@ class UpdateCompanyRequest extends FormRequest
         return [
             'name' => 'sometimes|required|string|max:191|unique:companies,name,' . $companyId,
             'email' => 'nullable|email|max:255', // Added email validation
-            // Allows changing the owner if the field is present, but otherwise keeps the existing owner.
+            'role' => 'nullable',
             'owner_user_id' => 'nullable|exists:users,id',
         ];
     }

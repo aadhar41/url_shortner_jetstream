@@ -14,15 +14,15 @@
                     </x-nav-link>
 
                     {{-- NEW: Company Management Link (SuperAdmin Only) --}}
-                    @if (Auth::user()->role === 'SuperAdmin')
-                        <x-nav-link href="{{ route('web.companies.index') }}" :active="request()->routeIs('web.companies.*')">
-                            {{ __('Companies') }}
-                        </x-nav-link>
-                    @endif
+                    {{-- @if (Auth::user()->role === 'SuperAdmin') --}}
+                    <x-nav-link href="{{ route('web.companies.index') }}" :active="request()->routeIs('web.companies.*')">
+                        {{ __('Companies') }}
+                    </x-nav-link>
+                    {{-- @endif --}}
 
                     {{-- NEW: Short URLs Link (Visible to all except SuperAdmin who has a special restriction) --}}
-                    @if (Auth::user()->role == 'SuperAdmin')
-                        <x-nav-link href="{{ route('web.short_urls.index') }}" :active="request()->routeIs('short_urls.*')">
+                    @if (Auth::user()->role !== 'SuperAdmin')
+                        <x-nav-link href="{{ route('web.short_urls.index') }}" :active="request()->routeIs('web.short_urls.*')">
                             {{ __('Short URLs') }}
                         </x-nav-link>
                     @endif
@@ -128,7 +128,7 @@
 
             {{-- NEW: Responsive Short URLs Link --}}
             @if (Auth::user()->role !== 'SuperAdmin')
-                <x-responsive-nav-link href="{{ route('short_urls.index') }}" :active="request()->routeIs('short_urls.*')">
+                <x-responsive-nav-link href="{{ route('web.short_urls.index') }}" :active="request()->routeIs('web.short_urls.*')">
                     {{ __('Short URLs') }}
                 </x-responsive-nav-link>
             @endif

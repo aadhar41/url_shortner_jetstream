@@ -2,7 +2,7 @@
     {{-- Page Header Slot --}}
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Company/Client Management') }}
+            {{ __('Client Management') }}
         </h2>
 
         {{-- DataTables CSS CDN --}}
@@ -18,7 +18,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <a href="{{ route('web.companies.create') }}"
                         class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out shadow-md">
-                        {{ __('Create New Company') }}
+                        {{ __('Invite') }}
                     </a>
                 </div>
 

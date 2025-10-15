@@ -36,7 +36,7 @@ class StoreCompanyRequest extends FormRequest
         return [
             'name' => 'required|string|max:191|unique:companies,name',
             'email' => 'nullable|email|max:255', // Added email validation
-            // This is now set internally, but we validate it to ensure it's a valid user ID.
+            'role' => 'nullable',
             'owner_user_id' => ['required', 'exists:users,id'],
         ];
     }
