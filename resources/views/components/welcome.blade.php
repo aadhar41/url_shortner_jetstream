@@ -1,96 +1,365 @@
-<div class="p-6 lg:p-8 bg-white border-b border-gray-200">
-    <x-application-logo class="block h-12 w-auto" />
+<!DOCTYPE html>
+<html lang="en">
 
-    <h1 class="mt-8 text-2xl font-medium text-gray-900">
-        Welcome to your Jetstream application!
-    </h1>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide to the Short URL System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Sandstone & Sage -->
+    <!-- Application Structure Plan: The SPA is designed as a vertical "explainer" page. It starts with a hero section introducing the system. The core is an interactive RBAC (Role-Based Access Control) simulator where users can select a role and see how permissions and data visibility change in real-time. This is more effective than reading static rules. This is followed by a grid explaining other key features (tracking, export) and concludes with an HTML/CSS-based flowchart visualizing the URL creation and resolution processes. This structure was chosen to turn a dense technical document into an engaging learning experience. -->
+    <!-- Visualization & Content Choices: 1. RBAC Simulator: Report Info (Creation/Visibility rules) -> Goal (Explore rules) -> Viz (Interactive buttons + dynamic table) -> Interaction (Click role button to filter table and toggle 'Create' button state) -> Justification (Learning by doing is superior to reading static tables) -> Library (Vanilla JS). 2. Process Flow: Report Info (URL creation/resolution flow) -> Goal (Explain processes) -> Viz (Diagram) -> Interaction (None) -> Justification (Flowcharts are ideal for process visualization) -> Library (HTML/Tailwind CSS). -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF7;
+            /* Sandstone */
+            color: #5C5552;
+            /* Sage-Brown */
+        }
 
-    <p class="mt-6 text-gray-500 leading-relaxed">
-        Laravel Jetstream provides a beautiful, robust starting point for your next Laravel application. Laravel is designed
-        to help you build your application using a development environment that is simple, powerful, and enjoyable. We believe
-        you should love expressing your creativity through programming, so we have spent time carefully crafting the Laravel
-        ecosystem to be a breath of fresh air. We hope you love it.
-    </p>
-</div>
+        .accent-bg {
+            background-color: #A6B1A9;
+        }
 
-<div class="bg-gray-200 bg-opacity-25 grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 p-6 lg:p-8">
-    <div>
-        <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="w-6 h-6 stroke-gray-400">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-            </svg>
-            <h2 class="ms-3 text-xl font-semibold text-gray-900">
-                <a href="https://laravel.com/docs">Documentation</a>
-            </h2>
-        </div>
+        /* Sage */
+        .accent-text {
+            color: #A6B1A9;
+        }
 
-        <p class="mt-4 text-gray-500 text-sm leading-relaxed">
-            Laravel has wonderful documentation covering every aspect of the framework. Whether you're new to the framework or have previous experience, we recommend reading all of the documentation from beginning to end.
-        </p>
+        .accent-bg-dark {
+            background-color: #727C75;
+        }
 
-        <p class="mt-4 text-sm">
-            <a href="https://laravel.com/docs" class="inline-flex items-center font-semibold text-indigo-700">
-                Explore the documentation
+        .highlight-bg {
+            background-color: #EAE6E1;
+        }
 
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="ms-1 w-5 h-5 fill-indigo-500">
-                    <path fill-rule="evenodd" d="M5 10a.75.75 0 01.75-.75h6.638L10.23 7.29a.75.75 0 111.04-1.08l3.5 3.25a.75.75 0 010 1.08l-3.5 3.25a.75.75 0 11-1.04-1.08l2.158-1.96H5.75A.75.75 0 015 10z" clip-rule="evenodd" />
-                </svg>
-            </a>
-        </p>
+        .btn-role.active {
+            background-color: #727C75;
+            color: #FFFFFF;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transform: translateY(-2px);
+        }
+
+        .flow-box {
+            border: 2px solid #EAE6E1;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            background-color: #fff;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flow-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #A6B1A9;
+            padding: 0 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .flow-arrow {
+                transform: rotate(90deg);
+                padding: 1rem 0;
+            }
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <!-- Hero Section -->
+        <header class="text-center mb-16">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Short URL Management System</h1>
+            <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">An interactive guide to the system's features
+                and its powerful Role-Based Access Control (RBAC) policy.</p>
+        </header>
+
+        <!-- RBAC Simulator Section -->
+        <section id="simulator" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">RBAC Policy Simulator</h2>
+                <p class="mt-2 text-gray-600">Select a role to see how permissions and data visibility change.</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <!-- Role Selector -->
+                <div class="mb-8">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-4 text-center">Simulate As:</h3>
+                    <div class="flex justify-center flex-wrap gap-4" id="role-selector">
+                        <button class="btn-role text-lg font-semibold py-3 px-6 rounded-lg transition-all duration-300"
+                            data-role="Member">Member</button>
+                        <button class="btn-role text-lg font-semibold py-3 px-6 rounded-lg transition-all duration-300"
+                            data-role="Admin">Admin</button>
+                        <button class="btn-role text-lg font-semibold py-3 px-6 rounded-lg transition-all duration-300"
+                            data-role="SuperAdmin">SuperAdmin</button>
+                    </div>
+                </div>
+
+                <!-- Actions & Permissions -->
+                <div class="highlight-bg p-6 rounded-lg mb-8">
+                    <h4 class="font-semibold text-gray-800 text-xl mb-4 text-center">Permissions for <span
+                            id="current-role-display" class="font-bold"></span></h4>
+                    <div class="flex justify-center items-center">
+                        <button id="create-url-btn"
+                            class="px-6 py-3 font-semibold rounded-md transition-colors duration-300 flex items-center gap-2">
+                            <span>279C</span> Create New Short URL
+                        </button>
+                    </div>
+                    <p id="create-permission-text" class="text-center mt-3 text-sm"></p>
+                </div>
+
+                <!-- Simulated Data Table -->
+                <div>
+                    <h4 class="font-semibold text-gray-800 text-xl mb-4">Simulated URL List</h4>
+                    <p id="visibility-text" class="text-center mb-4 text-sm"></p>
+                    <div class="overflow-x-auto border border-gray-200 rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Original URL</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Short Code</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Creator</th>
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Company</th>
+                                </tr>
+                            </thead>
+                            <tbody id="url-table-body" class="bg-white divide-y divide-gray-200">
+                                <!-- JS will populate this -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Features Section -->
+        <section id="features" class="mb-20">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">Key System Features</h2>
+                <p class="mt-2 text-gray-600">Beyond permissions, the system offers several core functionalities.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center">
+                    <div class="text-4xl mb-4 accent-text">📈</div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Access Tracking</h3>
+                    <p class="text-gray-600">Every click on a short URL is counted, providing valuable insight into link
+                        performance and engagement.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center">
+                    <div class="text-4xl mb-4 accent-text">📥</div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Data Export</h3>
+                    <p class="text-gray-600">Users can download a CSV file of the short URL data they are authorized to
+                        view, for offline analysis or reporting.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center">
+                    <div class="text-4xl mb-4 accent-text">🌍</div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-2">Public Redirection</h3>
+                    <p class="text-gray-600">All short links are publicly resolvable, meaning anyone can use them
+                        without needing to log into the system.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Flowchart Section -->
+        <section id="flowcharts">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800">Process Flow</h2>
+                <p class="mt-2 text-gray-600">Visualizing the core user journeys.</p>
+            </div>
+            <div class="space-y-12">
+                <div>
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-6 text-center">URL Creation Flow</h3>
+                    <div class="flex flex-col md:flex-row justify-center items-stretch">
+                        <div class="flow-box">User (Admin/Member)<br>provides long URL</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">System generates<br>unique short code</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">New Short URL<br>is created and listed</div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-6 text-center">URL Resolution Flow</h3>
+                    <div class="flex flex-col md:flex-row justify-center items-stretch">
+                        <div class="flow-box">Anyone visits<br>yourdomain.com/short_code</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">System finds original URL<br>& increments click count</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">User is instantly<br>redirected to original URL</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </div>
 
-    <div>
-        <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="w-6 h-6 stroke-gray-400">
-                <path stroke-linecap="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
-            </svg>
-            <h2 class="ms-3 text-xl font-semibold text-gray-900">
-                <a href="https://laracasts.com">Laracasts</a>
-            </h2>
-        </div>
+    <script>
+        const mockData = [{
+                id: 1,
+                original_url: 'https://example.com/very-long-product-page-1',
+                short_code: 'aB3xZ',
+                user_id: 1,
+                user_name: 'Alice (Member)',
+                company_id: 1,
+                company_name: 'Innovate Inc.'
+            },
+            {
+                id: 2,
+                original_url: 'https://example.com/internal-document-link',
+                short_code: 'cDEfg',
+                user_id: 3,
+                user_name: 'Charlie (Admin)',
+                company_id: 1,
+                company_name: 'Innovate Inc.'
+            },
+            {
+                id: 3,
+                original_url: 'https://google.com/search-query',
+                short_code: 'hIjK9',
+                user_id: 1,
+                user_name: 'Alice (Member)',
+                company_id: 1,
+                company_name: 'Innovate Inc.'
+            },
+            {
+                id: 4,
+                original_url: 'https://another-domain.org/resource-article',
+                short_code: 'LMnP7',
+                user_id: 2,
+                user_name: 'Bob (Member)',
+                company_id: 2,
+                company_name: 'Solutions Co.'
+            },
+            {
+                id: 5,
+                original_url: 'https://solutions.co/contact-us-page',
+                short_code: 'QrS2t',
+                user_id: 2,
+                user_name: 'Bob (Member)',
+                company_id: 2,
+                company_name: 'Solutions Co.'
+            },
+        ];
 
-        <p class="mt-4 text-gray-500 text-sm leading-relaxed">
-            Laracasts offers thousands of video tutorials on Laravel, PHP, and JavaScript development. Check them out, see for yourself, and massively level up your development skills in the process.
-        </p>
+        const roleSelector = document.getElementById('role-selector');
+        const urlTableBody = document.getElementById('url-table-body');
+        const createUrlBtn = document.getElementById('create-url-btn');
+        const currentRoleDisplay = document.getElementById('current-role-display');
+        const createPermissionText = document.getElementById('create-permission-text');
+        const visibilityText = document.getElementById('visibility-text');
 
-        <p class="mt-4 text-sm">
-            <a href="https://laracasts.com" class="inline-flex items-center font-semibold text-indigo-700">
-                Start watching Laracasts
+        let currentUser = {
+            id: 1,
+            role: 'Member',
+            company_id: 1
+        };
 
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" class="ms-1 w-5 h-5 fill-indigo-500">
-                    <path fill-rule="evenodd" d="M5 10a.75.75 0 01.75-.75h6.638L10.23 7.29a.75.75 0 111.04-1.08l3.5 3.25a.75.75 0 010 1.08l-3.5 3.25a.75.75 0 11-1.04-1.08l2.158-1.96H5.75A.75.75 0 015 10z" clip-rule="evenodd" />
-                </svg>
-            </a>
-        </p>
-    </div>
+        function render() {
+            // Update role display
+            const activeRole = currentUser.role;
+            currentRoleDisplay.textContent = activeRole;
 
-    <div>
-        <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="w-6 h-6 stroke-gray-400">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-            </svg>
-            <h2 class="ms-3 text-xl font-semibold text-gray-900">
-                <a href="https://tailwindcss.com/">Tailwind</a>
-            </h2>
-        </div>
+            // Clear and update role buttons
+            document.querySelectorAll('.btn-role').forEach(btn => {
+                if (btn.dataset.role === activeRole) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
 
-        <p class="mt-4 text-gray-500 text-sm leading-relaxed">
-            Laravel Jetstream is built with Tailwind, an amazing utility first CSS framework that doesn't get in your way. You'll be amazed how easily you can build and maintain fresh, modern designs with this wonderful framework at your fingertips.
-        </p>
-    </div>
+            // Update creation permission button and text
+            if (activeRole === 'Admin' || activeRole === 'Member') {
+                createUrlBtn.disabled = false;
+                createUrlBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                createUrlBtn.classList.add('bg-green-600', 'hover:bg-green-700', 'text-white');
+                createPermissionText.textContent = `As an ${activeRole}, you are permitted to create new short URLs.`;
+            } else { // SuperAdmin
+                createUrlBtn.disabled = true;
+                createUrlBtn.classList.remove('bg-green-600', 'hover:bg-green-700', 'text-white');
+                createUrlBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                createPermissionText.textContent = `As a ${activeRole}, you are restricted from creating short URLs.`;
+            }
 
-    <div>
-        <div class="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" class="w-6 h-6 stroke-gray-400">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-            </svg>
-            <h2 class="ms-3 text-xl font-semibold text-gray-900">
-                Authentication
-            </h2>
-        </div>
+            // Filter data and render table
+            urlTableBody.innerHTML = '';
+            let filteredData = [];
+            let visibilityDescription = '';
 
-        <p class="mt-4 text-gray-500 text-sm leading-relaxed">
-            Authentication and registration views are included with Laravel Jetstream, as well as support for user email verification and resetting forgotten passwords. So, you're free to get started with what matters most: building your application.
-        </p>
-    </div>
-</div>
+            if (activeRole === 'Member') {
+                filteredData = mockData.filter(item => item.user_id === currentUser.id);
+                visibilityDescription = 'As a Member, you can only see the short URLs you personally created.';
+            } else if (activeRole === 'Admin') {
+                filteredData = mockData.filter(item => item.company_id === currentUser.company_id);
+                visibilityDescription =
+                    'As an Admin, you can see all short URLs created by any user within your company (Innovate Inc.).';
+            } else { // SuperAdmin
+                filteredData = mockData;
+                visibilityDescription =
+                    'As a SuperAdmin, you have global visibility and can see all short URLs from all companies.';
+            }
+
+            visibilityText.textContent = visibilityDescription;
+
+            if (filteredData.length === 0) {
+                urlTableBody.innerHTML =
+                    `<tr><td colspan="4" class="text-center py-6 text-gray-500">No short URLs to display for this role's visibility.</td></tr>`;
+            } else {
+                filteredData.forEach(item => {
+                    const row = `
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 truncate" style="max-width: 20rem;" title="${item.original_url}">${item.original_url}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-mono">/${item.short_code}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.user_name}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${item.company_name}</td>
+                        </tr>
+                    `;
+                    urlTableBody.innerHTML += row;
+                });
+            }
+        }
+
+        roleSelector.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') {
+                const selectedRole = e.target.dataset.role;
+                currentUser.role = selectedRole;
+
+                // Simulate switching user context for different roles
+                if (selectedRole === 'Admin') {
+                    currentUser.id = 3;
+                    currentUser.company_id = 1;
+                } else if (selectedRole === 'SuperAdmin') {
+                    currentUser.id = 4;
+                    currentUser.company_id = 99; // Not part of a standard company
+                } else { // Member
+                    currentUser.id = 1;
+                    currentUser.company_id = 1;
+                }
+
+                render();
+            }
+        });
+
+        // Initial render
+        render();
+    </script>
+</body>
+
+</html>
