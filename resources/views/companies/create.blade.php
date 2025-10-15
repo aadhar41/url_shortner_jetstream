@@ -2,7 +2,7 @@
     {{-- Page Header Slot --}}
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Create Company') }}
+            {{ __('Invite Client') }}
         </h2>
     </x-slot>
 
@@ -18,7 +18,7 @@
 
                         {{-- Name Input --}}
                         <div class="mb-4">
-                            <x-label for="name" value="{{ __('Company Name') }}" />
+                            <x-label for="name" value="{{ __('Client Name') }}" />
                             <x-input id="name" type="text" name="name" :value="old('name')" required autofocus
                                 class="mt-1 block w-full" />
                             <x-input-error for="name" class="mt-2" />
@@ -26,11 +26,26 @@
 
                         {{-- Email Input --}}
                         <div class="mb-4">
-                            <x-label for="email" value="{{ __('Company Email') }}" />
+                            <x-label for="email" value="{{ __('Client Email') }}" />
                             <x-input id="email" type="email" name="email" :value="old('email')"
                                 class="mt-1 block w-full" />
                             <x-input-error for="email" class="mt-2" />
                         </div>
+
+                        @if (auth()->check() && auth()->user()->role === 'Admin')
+                            <div class="mb-4">
+                                <x-label for="role" value="{{ __('User Role') }}" />
+                                <select id="role" name="role" required
+                                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    @foreach ($assignableRoles as $role)
+                                        <option value="{{ $role }}" @selected(old('role', 'Admin') === $role)>
+                                            {{ $role }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <x-input-error for="role" class="mt-2" />
+                            </div>
+                        @endif
 
                         {{-- Buttons --}}
                         <div class="flex items-center justify-end mt-6">
@@ -42,7 +57,7 @@
 
                             {{-- Submit Button --}}
                             <x-button class="ms-4">
-                                {{ __('Create') }}
+                                {{ __('Invite') }}
                             </x-button>
                         </div>
                     </form>

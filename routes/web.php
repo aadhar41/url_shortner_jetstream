@@ -1,7 +1,9 @@
 <?php
-use App\Http\Controllers\Web\CompanyWebController;
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Web\ShortUrlController;
+use App\Http\Controllers\Web\CompanyWebController;
+use App\Http\Controllers\Web\UserWebController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,25 +20,22 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified',
-])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+// Public route for redirection
+Route::get('/{short_code}', [ShortUrlController::class, 'redirect'])->name('short_url.redirect');
 
-    // Companies web CRUD routes
-    Route::resource('companies', CompanyWebController::class, [
-        'names' => [
-            'index' => 'web.companies.index',
-            'create' => 'web.companies.create',
-            'store' => 'web.companies.store',
-            'show' => 'web.companies.show',
-            'edit' => 'web.companies.edit',
-            'update' => 'web.companies.update',
-            'destroy' => 'web.companies.destroy',
-        ]
-    ]);
-});
+// Authenticated routes for management
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])
+    ->prefix('web')
+    ->name('web.')
+    ->group(function () {
+        // ... (other web routes like companies.index, etc.)
+        Route::get('/dashboard', function () {
+            return view('dashboard');
+        })->name('dashboard');
+        Route::resource('companies', CompanyWebController::class);
+
+        Route::resource('users', UserWebController::class);
+
+        // Short URL Management Routes
+        Route::resource('short_urls', ShortUrlController::class);
+    });
