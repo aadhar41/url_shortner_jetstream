@@ -2,7 +2,7 @@
     {{-- Page Header Slot --}}
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Company Management') }}
+            {{ __('Company/Client Management') }}
         </h2>
 
         {{-- DataTables CSS CDN --}}
@@ -23,9 +23,9 @@
                 </div>
 
                 @if (session('success'))
-                    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
+                    <div class="bg-emerald-100 border border-emerald-500 text-emerald-800 px-5 py-4 rounded-lg relative mb-4 shadow-md transition duration-300"
                         role="alert">
-                        <span class="block sm:inline">{{ session('success') }}</span>
+                        <span class="block sm:inline font-semibold">{{ session('success') }}</span>
                     </div>
                 @endif
 
@@ -45,6 +45,12 @@
                                     Email</th>
                                 <th
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Owner</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Users</th>
+                                <th
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Actions</th>
                             </tr>
                         </thead>
@@ -57,6 +63,14 @@
                                     {{-- Email Column --}}
                                     <td class="px-6 py-4 whitespace-nowrap text-gray-700">
                                         {{ $company->email }}</td>
+
+                                    {{-- Owner Column --}}
+                                    <td class="px-6 py-4 whitespace-nowrap text-gray-700">
+                                        {{ $company->owner->name ?? 'N/A' }}</td>
+
+                                    {{-- Member Count Column --}}
+                                    <td class="px-6 py-4 whitespace-nowrap text-center font-bold text-indigo-600">
+                                        {{ $company->totalMemberCount() }}</td>
 
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                         {{-- Actions --}}
@@ -83,7 +97,8 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">
+                                    {{-- Colspan updated from 5 to 6 --}}
+                                    <td colspan="6" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">
                                         No companies found.
                                     </td>
                                 </tr>
@@ -105,9 +120,9 @@
         $(document).ready(function() {
             $('#companies-table').DataTable({
                 responsive: true,
-                // Disable ordering/searching on the Actions column
+                // Disable ordering/searching on the Actions column (now column index 5)
                 columnDefs: [{
-                    targets: 3,
+                    targets: 5, // Actions column index updated from 4 to 5
                     orderable: false,
                     searchable: false
                 }]

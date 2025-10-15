@@ -70,4 +70,15 @@ class User extends Authenticatable
         // The foreign key 'owner_user_id' is specified as it deviates from the default 'user_id'
         return $this->hasMany(Company::class, 'owner_user_id');
     }
+
+    /**
+     * Get the total count of companies owned by this user.
+     *
+     * @return int
+     */
+    public function totalOwnedCompaniesCount(): int
+    {
+        // Use the relationship to get the count efficiently without loading all models
+        return $this->ownedCompanies()->count();
+    }
 }

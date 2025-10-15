@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany; // Import HasMany
 
 class Company extends Model
 {
@@ -16,11 +17,7 @@ class Company extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'owner_user_id',
-        // Note: 'created_at' and 'updated_at' are usually handled by Laravel automatically
-        // and do not need to be in $fillable unless you intend to manually assign them.
+        'name', 'email', 'owner_user_id', 'created_at', 'updated_at'
     ];
 
     /**
@@ -30,7 +27,27 @@ class Company extends Model
      */
     public function owner(): BelongsTo
     {
-        // Assumes the foreign key is 'owner_user_id' and the local key on the User model is 'id'
         return $this->belongsTo(User::class, 'owner_user_id');
+    }
+
+    /**
+     * Get the users/members belonging to the company.
+     * * NOTE: This assumes a 'company_id' column exists on the 'users' table.
+     *
+     * @return HasMany
+     */
+    public function members(): HasMany
+    {
+        return $this->hasMany(User::class, 'company_id');
+    }
+
+    /**
+     * Get the total count of members in this company.
+     *
+     * @return int
+     */
+    public function totalMemberCount(): int
+    {
+        return $this->members()->count();
     }
 }
