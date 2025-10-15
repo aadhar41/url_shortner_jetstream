@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             CompanySeeder::class,
+            ShortUrlSeeder::class,
         ]);
 
         \App\Models\User::factory(10)->create()->each(function ($user) {

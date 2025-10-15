@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -28,6 +29,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'company_id', // Assuming this exists for company relationship
+        'role', // Used in navigation checks
     ];
 
     /**
@@ -69,6 +72,24 @@ class User extends Authenticatable
     {
         // The foreign key 'owner_user_id' is specified as it deviates from the default 'user_id'
         return $this->hasMany(Company::class, 'owner_user_id');
+    }
+
+    /**
+     * Get the company that the user belongs to.
+     */
+    public function company(): BelongsTo
+    {
+        // This is necessary for the navigation menu logic.
+        return $this->belongsTo(Company::class);
+    }
+
+    /**
+     * Get the short URLs created by the user.
+     */
+    public function shortUrls(): HasMany
+    {
+        // This fixes the Call to undefined method error.
+        return $this->hasMany(ShortUrl::class, 'user_id');
     }
 
     /**

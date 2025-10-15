@@ -21,9 +21,15 @@ class UpdateCompanyRequest extends FormRequest
      */
     public function rules(): array
     {
+        // The unique rule is modified to ignore the current company's ID, which is retrieved from the route.
+        // We use $this->route('company') which assumes the route uses a "company" parameter,
+        // typical for resourceful controllers.
+        $companyId = $this->route('company');
+
         return [
-            'name' => 'sometimes|required|string|max:191|unique:companies,name,' . $this->route('company'),
+            'name' => 'sometimes|required|string|max:191|unique:companies,name,' . $companyId,
             'email' => 'nullable|email|max:255', // Added email validation
+            // Allows changing the owner if the field is present, but otherwise keeps the existing owner.
             'owner_user_id' => 'nullable|exists:users,id',
         ];
     }
