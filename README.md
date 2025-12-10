@@ -10,7 +10,16 @@ This Laravel application module provides a complete solution for generating, tra
 * **Data Visibility:** Strict RBAC filtering ensures users only see data relevant to their role and scope.
 * **Data Export:** Allows users to download a CSV export of their authorized list of short URLs.
 
-## **🛠️ Project Setup and Installation**
+## **� Tech Stack**
+
+* **Framework:** Laravel 10.x
+* **Starter Kit:** Laravel Jetstream
+* **Frontend Stack:** Livewire + Blade
+* **Styling:** Tailwind CSS
+* **Database:** MySQL
+* **Language:** PHP 8.1+
+
+## **�🛠️ Project Setup and Installation**
 
 Follow these steps to get the application running on your local machine:
 
